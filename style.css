@@ -1,0 +1,55 @@
+body {
+    font-family: sans-serif;
+}
+
+row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+column, #grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#grid {
+    gap: 1px;
+}
+
+.grid-row {
+    gap: 1px;
+}
+
+.cell {
+    width: 8px;
+    height: 8px;
+    border: 1px solid #888;
+}
+
+.cell[data-state="player-win"] {
+    background-color: gold;
+}
+
+.cell[data-state="player"] {
+    background-color: #08f;
+}
+
+.cell[data-state="debug-target"] {
+    background-color: red;
+}
+
+.cell[data-state="visited"] {
+    background-color: #0f8;
+}
+
+.cell[data-state="empty"] {
+    background-color: #ccc;
+}
+
+.cell[data-border="highlight"] {
+    border-color: #0ff;
+}

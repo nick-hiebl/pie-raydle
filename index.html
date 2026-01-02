@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pie-Raydle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Pie-Raydle</h1>
+    <p>This game is a simplified version of pie-raying techniques from Minecraft speedrunning.</p>
+
+    <row>
+        <column>
+            <column>
+                <button id="radius-inc">Increase radius</button>
+                <button id="radius-dec">Decrease radius</button>
+            </column>
+            <column>
+                <button id="up">^</button>
+                <row>
+                    <button id="left">&lt;</button>
+                    <button id="down">v</button>
+                    <button id="right">&gt;</button>
+                </row>
+            </column>
+            <span>Time: <span id="time">0.00s</span></span>
+            <span>Radius: <span id="radius">2</span></span>
+            <span>Detected: <span id="detected">NO</span></span>
+            <span>Score: <span id="score">0</span></span>
+        </column>
+        <div id="grid"></div>
+    </row>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
