@@ -50,6 +50,10 @@ column, #grid {
     background-color: #ccc;
 }
 
+.cell[data-state="candidate"] {
+    background-color: #f80;
+}
+
 .cell[data-border="highlight"] {
     border-color: #0ff;
 }

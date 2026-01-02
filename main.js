@@ -2,6 +2,7 @@ const STATES = [
     'player-win',
     'player',
     'empty',
+    'candidate',
     'unknown',
 ];
 
@@ -11,6 +12,7 @@ const newCell = (x, y, isTarget, cell) => {
         y,
         isTarget,
         empty: false,
+        candidate: false,
         html: cell,
     };
 };
@@ -18,6 +20,7 @@ const newCell = (x, y, isTarget, cell) => {
 const DEBUG_SHOW_TARGET = false;
 const DEBUG_SHOW_EMPTY = false;
 const DEBUG_SHOW_RADIUS = false;
+const DEBUG_SHOW_CANDIDATE = false;
 
 const samePos = (a, b) => {
     return a.x === b.x && a.y === b.y;
@@ -38,6 +41,8 @@ const getCellState = (cell, player) => {
         return 'debug-target';
     } else if (DEBUG_SHOW_EMPTY && cell.empty) {
         return 'empty';
+    } else if (DEBUG_SHOW_CANDIDATE && cell.candidate) {
+        return 'candidate';
     } else {
         return 'unknown';
     }
@@ -78,6 +83,7 @@ function main() {
     let timeStarted = false;
     let startTime = 0;
     let endTime;
+    let hasMarkedCandidates = false;
 
     const grid = document.getElementById('grid');
     const data = [];
@@ -118,12 +124,25 @@ function main() {
         const distanceToTarget = absDist(pos, targetSpot);
         const detected = distanceToTarget <= radius;
 
+        const markingCandidates = detected && !hasMarkedCandidates;
+
+        if (markingCandidates) {
+            hasMarkedCandidates = true;
+        }
+
         for (let row of data) {
             for (let cell of row) {
                 const inRange = absDist(pos, cell) <= radius;
 
                 if (!detected && inRange) {
                     cell.empty = true;
+                    cell.candidate = false;
+                } else if (markingCandidates && inRange) {
+                    cell.candidate = true;
+                } else if (detected && !inRange) {
+                    cell.candidate = false;
+                } else if (samePos(cell, pos)) {
+                    cell.candidate = false;
                 }
 
                 cell.html.dataset.state = getCellState(cell, pos);
