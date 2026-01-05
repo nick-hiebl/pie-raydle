@@ -9,32 +9,54 @@
 </head>
 
 <body>
-    <h1>Pie-Raydle</h1>
-    <p>This game is a simplified version of pie-raying techniques from Minecraft speedrunning.</p>
-    <p>Use on-screen buttons to increase or decrease detection radius and move.</p>
-    <p>Or use WASD to move, F to increase radius and Shift+F to decrease radius.</p>
-
-    <row>
-        <column>
+    <div id="main">
+        <h1>Pie-Raydle</h1>
+        <p>This game is a simplified version of pie-raying techniques from Minecraft speedrunning.</p>
+        <p>Use on-screen buttons to increase or decrease detection radius and move.</p>
+        <p>Or use WASD/arrow keys to move, F to increase radius and Shift+F to decrease radius.</p>
+    
+        <column id="game-menu" class="left">
+            Welcome to Pie-raydle
             <column>
-                <button id="radius-inc">Increase radius</button>
-                <button id="radius-dec">Decrease radius</button>
+                <column class="game-mode">
+                    <button id="start-intro">Start intro</button>
+                    Be shown where the red target is immediately to help you wrap your head around the system/training tool.
+                </column>
+                <column class="game-mode">
+                    <button id="start-easy">Start practice</button>
+                    Have your radius visualised, and see which squares are candidates (in orange) or definitely empty (in grey).
+                </column>
+                <column class="game-mode">
+                    <button id="start-hard">Start standard</button>
+                    See nothing but the grid, and still try to find that target square.
+                </column>
             </column>
-            <column>
-                <button id="up">^</button>
-                <row>
-                    <button id="left">&lt;</button>
-                    <button id="down">v</button>
-                    <button id="right">&gt;</button>
-                </row>
-            </column>
-            <span>Time: <span id="time">0.00s</span></span>
-            <span>Radius: <span id="radius">2</span></span>
-            <span>Detected: <span id="detected">NO</span></span>
-            <span>Score: <span id="score">0</span></span>
         </column>
-        <div id="grid"></div>
-    </row>
+    
+        <row id="game-layout" data-hidden=true>
+            <column>
+                <column>
+                    <button id="radius-inc">Increase radius</button>
+                    <button id="radius-dec">Decrease radius</button>
+                </column>
+                <column>
+                    <button id="up">^</button>
+                    <row>
+                        <button id="left">&lt;</button>
+                        <button id="down">v</button>
+                        <button id="right">&gt;</button>
+                    </row>
+                </column>
+                <span>Time: <span id="time">0.00s</span></span>
+                <span>Radius: <span id="radius">2</span></span>
+                <span>Detected: <span id="detected">NO</span></span>
+                <span>Score: <span id="score">0</span></span>
+                <button id="reset-game">Reset</button>
+                <button id="return-to-menu">Back to menu</button>
+            </column>
+            <div id="grid"></div>
+        </row>
+    </div>
 
     <script src="main.js"></script>
 </body>

@@ -17,11 +17,6 @@ const newCell = (x, y, isTarget, cell) => {
     };
 };
 
-const DEBUG_SHOW_TARGET = false;
-const DEBUG_SHOW_EMPTY = false;
-const DEBUG_SHOW_RADIUS = false;
-const DEBUG_SHOW_CANDIDATE = false;
-
 const samePos = (a, b) => {
     return a.x === b.x && a.y === b.y;
 };
@@ -30,18 +25,18 @@ const absDist = (a, b) => {
     return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 };
 
-const getCellState = (cell, player) => {
+const getCellState = (cell, player, config) => {
     if (samePos(cell, player)) {
         if (cell.isTarget) {
             return 'player-win';
         } else {
             return 'player';
         }
-    } else if (DEBUG_SHOW_TARGET && cell.isTarget) {
+    } else if (config.showTarget && cell.isTarget) {
         return 'debug-target';
-    } else if (DEBUG_SHOW_EMPTY && cell.empty) {
+    } else if (config.showEmpty && cell.empty) {
         return 'empty';
-    } else if (DEBUG_SHOW_CANDIDATE && cell.candidate) {
+    } else if (config.showCandidate && cell.candidate) {
         return 'candidate';
     } else {
         return 'unknown';
@@ -117,7 +112,7 @@ const createOrLoadGrid = () => {
     return cells;
 };
 
-function startGame(onComplete, onReset) {
+function startGame(onComplete, onReset, gameConfig) {
     const pos = { x: 0, y: 0 };
     let radius = 8;
     const targetSpot = chooseRandomStart();
@@ -185,8 +180,8 @@ function startGame(onComplete, onReset) {
                     cell.candidate = false;
                 }
 
-                cell.html.dataset.state = getCellState(cell, pos);
-                cell.html.dataset.border = DEBUG_SHOW_RADIUS && absDist(cell, pos) === radius ? 'highlight' : undefined;
+                cell.html.dataset.state = getCellState(cell, pos, gameConfig);
+                cell.html.dataset.border = gameConfig.showRadius && absDist(cell, pos) === radius ? 'highlight' : undefined;
             }
         }
 
@@ -247,6 +242,7 @@ function startGame(onComplete, onReset) {
         if (samePos(pos, targetSpot)) {
             isFinished = true;
             endTime = performance.now();
+            onComplete({ score, duration: endTime - startTime });
         }
     };
 
@@ -301,9 +297,13 @@ function startGame(onComplete, onReset) {
     eventListener('left', 'click', moveLeft);
     eventListener('right', 'click', moveRight);
 
+    eventListener('reset-game', 'click', onReset);
+
     document.addEventListener('keydown', onKeyDown);
 
     const cleanup = () => {
+        isFinished = true;
+
         removeListener('radius-inc', 'click', radiusInc);
         removeListener('radius-dec', 'click', radiusDec);
 
@@ -311,6 +311,8 @@ function startGame(onComplete, onReset) {
         removeListener('down', 'click', moveDown);
         removeListener('left', 'click', moveLeft);
         removeListener('right', 'click', moveRight);
+
+        removeListener('reset-game', 'click', onReset);
 
         document.removeEventListener('keydown', onKeyDown);
     };
@@ -320,8 +322,84 @@ function startGame(onComplete, onReset) {
     };
 }
 
+const INTRO_CONFIG = {
+    showTarget: true,
+    showCandidate: true,
+    showEmpty: true,
+    showRadius: true,
+};
+
+const EASY_CONFIG = {
+    showTarget: false,
+    showCandidate: true,
+    showEmpty: true,
+    showRadius: true,
+};
+
+const HARD_CONFIG = {
+    showTarget: false,
+    showCandidate: false,
+    showEmpty: false,
+    showRadius: false,
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        startGame();
-    }, 100);
+    const menu = document.getElementById('game-menu');
+    const game = document.getElementById('game-layout');
+
+    let lastCleanup = null;
+    let currentConfig = HARD_CONFIG;
+
+    const onComplete = (data) => {
+        console.log('data', data);
+    };
+
+    const backToMenu = () => {
+        menu.dataset.hidden = false;
+        game.dataset.hidden = true;
+
+        if (lastCleanup) {
+            lastCleanup();
+        }
+    };
+
+    const onStart = () => {
+        if (lastCleanup) {
+            lastCleanup();
+        }
+
+        setTimeout(() => {
+            menu.dataset.hidden = true;
+            game.dataset.hidden = false;
+
+            const { cleanup } = startGame(
+                onComplete,
+                onStart,
+                currentConfig,
+            );
+
+            lastCleanup = cleanup;
+        }, 100);
+    };
+
+    game.dataset.hidden = true;
+
+    eventListener('start-intro', 'click', () => {
+        currentConfig = INTRO_CONFIG;
+        onStart();
+    });
+
+    eventListener('start-easy', 'click', () => {
+        currentConfig = EASY_CONFIG;
+        onStart();
+    });
+
+    eventListener('start-hard', 'click', () => {
+        currentConfig = HARD_CONFIG;
+        onStart();
+    });
+
+    eventListener('return-to-menu', 'click', () => {
+        backToMenu();
+    });
 });

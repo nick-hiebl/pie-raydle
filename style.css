@@ -2,6 +2,15 @@ body {
     font-family: sans-serif;
 }
 
+*[data-hidden=true] {
+    display: none;
+}
+
+#main {
+    max-width: 600px;
+    margin-inline: auto;
+}
+
 row {
     display: flex;
     flex-direction: row;
@@ -14,6 +23,21 @@ column, #grid {
     flex-direction: column;
     align-items: center;
     gap: 8px;
+}
+
+column.left {
+    align-items: start;
+}
+
+.game-mode > button {
+    min-width: 200px;
+    padding-block: 4px;
+}
+
+.game-mode {
+    font-size: 0.75em;
+    gap: 2px;
+    margin-block-end: 4px;
 }
 
 #grid {
