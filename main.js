@@ -74,19 +74,28 @@ const eventListener = (id, eventName, callback) => {
     document.getElementById(id).addEventListener(eventName, callback);
 };
 
-function main() {
-    const pos = { x: 0, y: 0 };
-    let radius = 8;
-    const targetSpot = chooseRandomStart();
-    let score = 0;
-    let isFinished = false;
-    let timeStarted = false;
-    let startTime = 0;
-    let endTime;
-    let hasMarkedCandidates = false;
+const removeListener = (id, eventName, callback) => {
+    document.getElementById(id).removeEventListener(eventName, callback);
+};
 
+const loadGrid = () => {
+    const cells = [];
+
+    for (const row of Array.from(document.getElementById('grid').children)) {
+        cells.push(Array.from(row.children));
+    }
+
+    return cells;
+};
+
+const createOrLoadGrid = () => {
     const grid = document.getElementById('grid');
-    const data = [];
+
+    if (grid.children.length > 0) {
+        return loadGrid();
+    }
+
+    const cells = [];
 
     for (let y = MIN_Y; y <= MAX_Y; y++) {
         const row = document.createElement('row');
@@ -97,16 +106,47 @@ function main() {
             const htmlCell = document.createElement('div');
             htmlCell.classList.add('cell');
 
+            dataRow.push(htmlCell);
+            row.appendChild(htmlCell);
+        }
+
+        cells.push(dataRow);
+        grid.appendChild(row);
+    }
+
+    return cells;
+};
+
+function startGame(onComplete, onReset) {
+    const pos = { x: 0, y: 0 };
+    let radius = 8;
+    const targetSpot = chooseRandomStart();
+    let score = 0;
+    let isFinished = false;
+    let timeStarted = false;
+    let startTime = 0;
+    let endTime;
+    let hasMarkedCandidates = false;
+
+    const data = [];
+
+    const cells = createOrLoadGrid();
+
+    for (let y = MIN_Y; y <= MAX_Y; y++) {
+        const cellsRow = cells[y - MIN_Y];
+
+        const dataRow = [];
+
+        for (let x = MIN_X; x <= MAX_X; x++) {
+            const htmlCell = cellsRow[x - MIN_X];
+
             const isTarget = x === targetSpot.x && y === targetSpot.y;
 
             const cell = newCell(x, y, isTarget, htmlCell);
 
             dataRow.push(cell);
-
-            row.appendChild(htmlCell);
         }
 
-        grid.appendChild(row);
         data.push(dataRow);
     }
 
@@ -235,15 +275,7 @@ function main() {
         }
     };
 
-    eventListener('radius-inc', 'click', radiusInc);
-    eventListener('radius-dec', 'click', radiusDec);
-
-    eventListener('up', 'click', moveUp);
-    eventListener('down', 'click', moveDown);
-    eventListener('left', 'click', moveLeft);
-    eventListener('right', 'click', moveRight);
-
-    document.addEventListener('keydown', (e) => {
+    const onKeyDown = (e) => {
         if (e.key === 'f') {
             radiusInc();
         } else if (e.key === 'F') {
@@ -256,12 +288,40 @@ function main() {
             moveLeft();
         } else if (['d', 'arrowright'].includes(e.key.toLowerCase())) {
             moveRight();
+        } else if (['r'].includes(e.key.toLowerCase())) {
+            onReset();
         }
-    });
+    };
+
+    eventListener('radius-inc', 'click', radiusInc);
+    eventListener('radius-dec', 'click', radiusDec);
+
+    eventListener('up', 'click', moveUp);
+    eventListener('down', 'click', moveDown);
+    eventListener('left', 'click', moveLeft);
+    eventListener('right', 'click', moveRight);
+
+    document.addEventListener('keydown', onKeyDown);
+
+    const cleanup = () => {
+        removeListener('radius-inc', 'click', radiusInc);
+        removeListener('radius-dec', 'click', radiusDec);
+
+        removeListener('up', 'click', moveUp);
+        removeListener('down', 'click', moveDown);
+        removeListener('left', 'click', moveLeft);
+        removeListener('right', 'click', moveRight);
+
+        document.removeEventListener('keydown', onKeyDown);
+    };
+
+    return {
+        cleanup,
+    };
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        main();
+        startGame();
     }, 100);
 });
