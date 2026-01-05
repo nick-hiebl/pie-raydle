@@ -7,7 +7,7 @@ body {
 }
 
 #main {
-    max-width: 600px;
+    max-width: 750px;
     margin-inline: auto;
 }
 
@@ -80,4 +80,13 @@ column.left {
 
 .cell[data-border="highlight"] {
     border-color: #0ff;
+}
+
+.f3-info {
+    font-size: 0.5em;
+    font-family: monospace;
+}
+
+*[data-invisible="true"] {
+    visibility: hidden;
 }

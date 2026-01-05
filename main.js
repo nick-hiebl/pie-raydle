@@ -123,9 +123,18 @@ function startGame(onComplete, onReset, gameConfig) {
     let endTime;
     let hasMarkedCandidates = false;
 
+    let pieChartOpen = false;
+
+    let isSpawnerLoaded = false;
+
+    document.getElementById('detected-row').dataset.hidden = !gameConfig.showDetected;
+
     const data = [];
 
     const cells = createOrLoadGrid();
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
     for (let y = MIN_Y; y <= MAX_Y; y++) {
         const cellsRow = cells[y - MIN_Y];
@@ -155,9 +164,55 @@ function startGame(onComplete, onReset, gameConfig) {
         document.getElementById('time').innerText = `${(duration / 1_000).toFixed(2)}s`;
     };
 
+    const canvasSpot = document.getElementById('canvas-spot');
+
+    const drawPieChart = () => {
+        ctx.clearRect(0, 0, 150, 110);
+        ctx.imageSmoothingEnabled = false;
+
+        canvasSpot.dataset.invisible = !pieChartOpen;
+
+        const allGroups = [
+            { dark: '#236733', light: '#46ce66', id: 'unspecified', weight: 9 },
+            { dark: '#326762', light: '#c66ee4', id: 'minecraft:chest', weight: 1.8 },
+            { dark: '#326762', light: '#64cec4', id: 'minecraft:mob_spawner', disabled: !isSpawnerLoaded, weight: 1 },
+        ];
+
+        const groups = allGroups.filter(group => !group.disabled);
+
+        const total = groups.reduce((v, a) => a.weight + v, 0);
+
+        const drawWith = (getColor, baseY) => {
+            let startAngle = -Math.PI / 2;
+
+            for (const group of groups) {
+                const wedgeSize = group.weight / total * 2 * Math.PI;
+
+                ctx.fillStyle = getColor(group);
+                ctx.beginPath();
+                ctx.ellipse(75, baseY, 75, 50, 0, startAngle, startAngle + wedgeSize);
+                ctx.lineTo(75, baseY);
+                ctx.fill();
+
+                startAngle += wedgeSize;
+            }
+        };
+
+        drawWith(group => group.dark, 55);
+        drawWith(group => group.light, 50);
+
+        allGroups.forEach(group => {
+            document.getElementById(group.id).dataset.invisible = !!group.disabled;
+        });
+    };
+
     const updateVisuals = () => {
         const distanceToTarget = absDist(pos, targetSpot);
         const detected = distanceToTarget <= radius;
+
+        const forceUnload = !pieChartOpen && (distanceToTarget >= radius + 4);
+        console.log({ distanceToTarget, radius, pieChartOpen, forceUnload });
+        isSpawnerLoaded = forceUnload ? false : (isSpawnerLoaded || detected);
 
         const markingCandidates = detected && !hasMarkedCandidates;
 
@@ -193,9 +248,11 @@ function startGame(onComplete, onReset, gameConfig) {
     };
 
     updateVisuals();
+    drawPieChart();
 
     const startTimeLoop = () => {
         updateTimestamp();
+        drawPieChart();
 
         if (!isFinished) {
             requestAnimationFrame(startTimeLoop);
@@ -228,6 +285,12 @@ function startGame(onComplete, onReset, gameConfig) {
                 startTime = performance.now();
             }
         }
+    };
+
+    const toggleF3 = () => {
+        pieChartOpen = !pieChartOpen;
+        canvasSpot.dataset.invisible = !pieChartOpen;
+        updateVisuals();
     };
 
     const postMove = () => {
@@ -272,10 +335,12 @@ function startGame(onComplete, onReset, gameConfig) {
     };
 
     const onKeyDown = (e) => {
-        if (e.key === 'f') {
-            radiusInc();
-        } else if (e.key === 'F') {
-            radiusDec();
+        if (e.code === 'KeyF') {
+            if (e.shiftKey) {
+                radiusDec();
+            } else {
+                radiusInc();
+            }
         } else if (['w', 'arrowup'].includes(e.key.toLowerCase())) {
             moveUp();
         } else if (['s', 'arrowdown'].includes(e.key.toLowerCase())) {
@@ -286,11 +351,14 @@ function startGame(onComplete, onReset, gameConfig) {
             moveRight();
         } else if (['r'].includes(e.key.toLowerCase())) {
             onReset();
+        } else if (e.code === 'Digit3') {
+            toggleF3();
         }
     };
 
     eventListener('radius-inc', 'click', radiusInc);
     eventListener('radius-dec', 'click', radiusDec);
+    eventListener('toggle-f3', 'click', toggleF3);
 
     eventListener('up', 'click', moveUp);
     eventListener('down', 'click', moveDown);
@@ -306,6 +374,7 @@ function startGame(onComplete, onReset, gameConfig) {
 
         removeListener('radius-inc', 'click', radiusInc);
         removeListener('radius-dec', 'click', radiusDec);
+        removeListener('toggle-f3', 'click', toggleF3);
 
         removeListener('up', 'click', moveUp);
         removeListener('down', 'click', moveDown);
@@ -327,6 +396,7 @@ const INTRO_CONFIG = {
     showCandidate: true,
     showEmpty: true,
     showRadius: true,
+    showDetected: true,
 };
 
 const EASY_CONFIG = {
@@ -334,6 +404,7 @@ const EASY_CONFIG = {
     showCandidate: true,
     showEmpty: true,
     showRadius: true,
+    showDetected: true,
 };
 
 const HARD_CONFIG = {
@@ -341,6 +412,15 @@ const HARD_CONFIG = {
     showCandidate: false,
     showEmpty: false,
     showRadius: false,
+    showDetected: true,
+};
+
+const CHART_ONLY_CONFIG = {
+    showTarget: false,
+    showCandidate: false,
+    showEmpty: false,
+    showRadius: false,
+    showDetected: false,
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -396,6 +476,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     eventListener('start-hard', 'click', () => {
         currentConfig = HARD_CONFIG;
+        onStart();
+    });
+
+    eventListener('start-chart-only', 'click', () => {
+        currentConfig = CHART_ONLY_CONFIG;
         onStart();
     });
 

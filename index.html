@@ -14,21 +14,35 @@
         <p>This game is a simplified version of pie-raying techniques from Minecraft speedrunning.</p>
         <p>Use on-screen buttons to increase or decrease detection radius and move.</p>
         <p>Or use WASD/arrow keys to move, F to increase radius and Shift+F to decrease radius.</p>
+        <p>You can also press 3 or Shift+3 to toggle the F3 menu open and closed.</p>
     
         <column id="game-menu" class="left">
-            Welcome to Pie-raydle
+            <div>
+                <p>The aim of the game is to get as low a time as possible, and get a low score.</p>
+                <p>
+                    Score increases by 1 point for each radius increase/decrease, and 10 points for each square travelled.
+                </p>
+            </div>
             <column>
                 <column class="game-mode">
                     <button id="start-intro">Start intro</button>
-                    Be shown where the red target is immediately to help you wrap your head around the system/training tool.
+                    Be shown where the red target is immediately to help you wrap your head around the system/training
+                    tool.
                 </column>
                 <column class="game-mode">
                     <button id="start-easy">Start practice</button>
-                    Have your radius visualised, and see which squares are candidates (in orange) or definitely empty (in grey).
+                    Have your radius visualised, and see which squares are candidates (in orange) or definitely empty
+                    (in grey).
                 </column>
                 <column class="game-mode">
                     <button id="start-hard">Start standard</button>
                     See nothing but the grid, and still try to find that target square.
+                </column>
+                <column class="game-mode">
+                    <button id="start-chart-only">Start chart only</button>
+                    Like in Minecraft, you only have the pie chart to work with. The pie chart indicates when a mob
+                    spawner is loaded, but has a 4 chunk buffer in which it will stay loaded. So you need to decrease
+                    your radius by 4 and then close and re-open the chart menu to successfully unload the spawner.
                 </column>
             </column>
         </column>
@@ -38,6 +52,7 @@
                 <column>
                     <button id="radius-inc">Increase radius</button>
                     <button id="radius-dec">Decrease radius</button>
+                    <button id="toggle-f3">Toggle F3</button>
                 </column>
                 <column>
                     <button id="up">^</button>
@@ -49,12 +64,19 @@
                 </column>
                 <span>Time: <span id="time">0.00s</span></span>
                 <span>Radius: <span id="radius">2</span></span>
-                <span>Detected: <span id="detected">NO</span></span>
+                <span id="detected-row">Detected: <span id="detected">NO</span></span>
                 <span>Score: <span id="score">0</span></span>
                 <button id="reset-game">Reset</button>
                 <button id="return-to-menu">Back to menu</button>
             </column>
             <div id="grid"></div>
+            <column id="canvas-spot" class="left">
+                <span class="f3-info">root.tick.level.entities.blockEntities</span>
+                <canvas id="canvas" width="150" height="110"></canvas>
+                <span class="f3-info" id="unspecified">[?] unspecified</span>
+                <span class="f3-info" id="minecraft:chest">[2] minecraft:chest</span>
+                <span class="f3-info" id="minecraft:mob_spawner">[3] minecraft:mob_spawner</span>
+            </column>
         </row>
     </div>
 
