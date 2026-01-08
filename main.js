@@ -125,6 +125,7 @@ function startGame(onComplete, onReset, gameConfig) {
 
     let pieChartOpen = false;
 
+    let isSpawnerShown = false;
     let isSpawnerLoaded = false;
 
     document.getElementById('detected-row').dataset.hidden = !gameConfig.showDetected;
@@ -175,7 +176,7 @@ function startGame(onComplete, onReset, gameConfig) {
         const allGroups = [
             { dark: '#236733', light: '#46ce66', id: 'unspecified', weight: 9 },
             { dark: '#326762', light: '#c66ee4', id: 'minecraft:chest', weight: 1.8 },
-            { dark: '#326762', light: '#64cec4', id: 'minecraft:mob_spawner', disabled: !isSpawnerLoaded, weight: 1 },
+            { dark: '#326762', light: '#64cec4', id: 'minecraft:mob_spawner', disabled: !isSpawnerShown, weight: 1 },
         ];
 
         const groups = allGroups.filter(group => !group.disabled);
@@ -210,9 +211,14 @@ function startGame(onComplete, onReset, gameConfig) {
         const distanceToTarget = absDist(pos, targetSpot);
         const detected = distanceToTarget <= radius;
 
-        const forceUnload = !pieChartOpen && (distanceToTarget >= radius + 4);
-        console.log({ distanceToTarget, radius, pieChartOpen, forceUnload });
-        isSpawnerLoaded = forceUnload ? false : (isSpawnerLoaded || detected);
+        const forceUnload = distanceToTarget >= radius + 4;
+        isSpawnerLoaded = forceUnload ? false : isSpawnerLoaded || detected;
+
+        if (pieChartOpen) {
+            isSpawnerShown = isSpawnerLoaded || isSpawnerShown;
+        } else {
+            isSpawnerShown = false;
+        }
 
         const markingCandidates = detected && !hasMarkedCandidates;
 
