@@ -90,3 +90,7 @@ column.left {
 *[data-invisible="true"] {
     visibility: hidden;
 }
+
+.version-number {
+    font-size: 0.5em;
+}
